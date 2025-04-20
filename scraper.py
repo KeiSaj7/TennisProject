@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 
 def try_url(player1: str, player2: str):
     url = f"https://tennisstats.com/h2h/{player1}-vs-{player2}"
+    print(url)
     
     try:
         response = requests.get(url= url)
@@ -18,11 +19,21 @@ def try_url(player1: str, player2: str):
         return (None, None)
     return score, soup
 
+def check_name_length(name: list[str]) -> str:
+    if len(name) != 2:
+        player1_name = name[len(name)-1]
+        name.pop(len(name)-1)
+        for name_part in name:
+            player1_name = player1_name + "-" + name_part
+        return player1_name
+    return name[1] + '-' + name[0]
+        
 def get_H2H_stats(player1: str, player2: str) -> dict:
     player1 = player1.lower().replace(" ", "").split(",")
     player2 = player2.lower().replace(" ", "").split(",")
-    player1 = player1[1] + '-' + player1[0]
-    player2 = player2[1] + '-' + player2[0]
+    player1 = check_name_length(player1)
+    player2 = check_name_length(player2)
+    print(f"[SCRAPER] Scraping H2H stats for {player1} vs {player2}")
     stats = {
         player1 : {"H2H wins": None, "Form score": None, "Hardcourt wins": None, "Clay wins": None, "Grass wins": None},
         player2 : {"H2H wins": None, "Form score": None, "Hardcourt wins": None, "Clay wins": None, "Grass wins": None}
@@ -31,6 +42,7 @@ def get_H2H_stats(player1: str, player2: str) -> dict:
     score, soup = try_url(player1, player2) 
     if score is None:
         score, soup = try_url(player2, player1)
+        player1, player2 = player2, player1
         if score is None:
             print(f"[SCRAPER] No H2H score found for {player1} vs {player2}.")
             return None

@@ -1,0 +1,75 @@
+<!-- templates/h2h_result.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>H2H Result</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="absolute top-4 left-4 flex space-x-4 text-white text-lg font-semibold">
+        <a href="{{ url_for('home') }}" class="hover:underline text-blue-600">Search</a>
+        <a href="{{ url_for('h2h') }}" class="hover:underline text-blue-600 underline">H2H</a>
+    </div>
+
+    {% macro form_color(score) %}
+        {% if score <= 20 %}
+            bg-red-500 text-white
+        {% elif score <= 40 %}
+            bg-orange-400 text-white
+        {% elif score <= 60 %}
+            bg-yellow-400 text-black
+        {% elif score <= 80 %}
+            bg-green-300 text-black
+        {% else %}
+            bg-green-500 text-white
+        {% endif %}
+    {% endmacro %}
+
+    <div class="w-full max-w-4xl mx-auto pt-24">
+        <h1 class="text-3xl font-bold text-center text-blue-600 mb-10">Head to Head Comparison</h1>
+
+        {% if error %}
+            <p class="text-center text-blue-500 text-xl font-semibold mt-10">
+                {{ error }}
+        </p>
+        {% else %}
+            <div class="bg-white rounded-2xl shadow-md p-6 grid grid-cols-3 gap-6 items-center">
+                <!-- Player 1 -->
+                <div class="text-center">
+                    <div class="flex items-center justify-center space-x-2 mb-2">
+                        <h2 class="text-xl font-semibold text-blue-700">{{ player1 }}</h2>
+                        <span class="px-2 py-1 text-sm text-white font-semibold rounded {{ form_color(stats1['Form score']) }}">
+                            {{ stats1['Form score'] }}
+                        </span>
+                    </div>
+                    {% for key, value in stats1.items() if key not in ['H2H wins', 'Form score'] %}
+                        <p class="text-gray-700"><span class="font-medium">{{ key }}:</span> {{ value }}</p>
+                    {% endfor %}
+                </div>
+
+                <!-- H2H Record in center -->
+                <div class="text-center">
+                    <p class="text-lg text-gray-600 font-medium">H2H Record</p>
+                    <p class="text-3xl font-bold text-blue-500 my-2">
+                        {{ stats1['H2H wins'] }} - {{ stats2['H2H wins'] }}
+                    </p>
+                </div>
+
+                <!-- Player 2 -->
+                <div class="text-center">
+                    <div class="flex items-center justify-center space-x-2 mb-2">
+                        <h2 class="text-xl font-semibold text-blue-700">{{ player2 }}</h2>
+                        <span class="px-2 py-1 text-sm text-white font-semibold rounded {{ form_color(stats2['Form score']) }}">
+                            {{ stats2['Form score'] }}
+                        </span>
+                    </div>
+                    {% for key, value in stats2.items() if key not in ['H2H wins', 'Form score'] %}
+                        <p class="text-gray-700"><span class="font-medium">{{ key }}:</span> {{ value }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
