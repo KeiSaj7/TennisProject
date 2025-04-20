@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tennis Predictor v1.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="w-full max-w-md mx-auto pt-24 relative">
+        <!-- App Title -->
+        <h1 class="text-3xl font-bold text-center text-blue-600 mb-8 drop-shadow-sm">
+            Tennis Predictor v1.0
+        </h1>
+        <!-- Search bar -->
+        <div class="relative">
+            <input
+                type="text"
+                name="player"
+                id="player"
+                placeholder="Search player..."
+                class="w-full pr-16 pl-4 py-2 rounded-full border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                hx-get="/search"
+                hx-trigger="keyup changed delay:300ms"
+                hx-target="#suggestions"
+                hx-swap="innerHTML"
+                autocomplete="off"
+            />
+            <button
+                id="search-btn"
+                class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-500 text-white px-4 py-1 rounded-full hover:bg-blue-600 focus:outline-none text-sm"
+            >
+                Go
+            </button>
+        </div>
+
+        <!-- Suggestions dropdown list -->
+        <ul
+            id="suggestions"
+            class="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-md shadow-md z-10 max-h-60 overflow-y-auto"
+        ></ul>
+    </div>
+    <script>
+        document.addEventListener('click', function (e) {
+            const target = e.target;
+            if (target.matches('.suggestion-item')) {
+                const input = document.getElementById('player');
+                input.value = target.textContent.trim();
+    
+                document.getElementById('suggestions').innerHTML = '';
+            }
+        });
+        
+        document.getElementById('search-btn').addEventListener('click', function () {
+            const playerName = document.getElementById('player').value.replace(/ /g, "-").trim();
+            if (playerName) {
+                window.location.href = `/player/${encodeURIComponent(playerName)}`;
+            }
+        });
+    </script>
+</body>
+</html>

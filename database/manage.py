@@ -1,6 +1,7 @@
 import sqlite3
 
-con = sqlite3.connect('tennis.db')
+con = sqlite3.connect('tennis.db', check_same_thread=False)
+con.row_factory = sqlite3.Row
 cur = con.cursor()
 
 # SeaonCompetitors Table
@@ -18,7 +19,6 @@ def add_to_season_competitors(data: dict) -> None:
 def get_competitors_ids() -> list[str]:
     table="SeasonCompetitors"
     try:
-        cur.row_factory = sqlite3.Row
         competitors_ids = cur.execute(f"SELECT id FROM {table}").fetchall()
         return [row["id"] for row in competitors_ids]
     except sqlite3.Error as e:
@@ -28,12 +28,20 @@ def get_competitors_ids() -> list[str]:
 def get_competitor_name_by_id(competitor_id: str) -> str:
     table="SeasonCompetitors"
     try:
-        cur.row_factory = sqlite3.Row
         competitor_name: str = cur.execute(f"SELECT name FROM {table} WHERE id = ?", (competitor_id,)).fetchone()
         return competitor_name["name"] if competitor_name else None
     except sqlite3.Error as e:
         print(f"[DB] An error occurred: {e}")
         return None
+    
+def get_all_competitors_names() -> list[str]:
+    table="SeasonCompetitors"
+    try:
+        competitors_names = cur.execute(f"SELECT name FROM {table}").fetchall()
+        return [row["name"].replace(',', '') for row in competitors_names]
+    except sqlite3.Error as e:
+        print(f"[DB] An error occurred: {e}")
+        return ["Error"]
     
 # CompetitorProfile Table and it's sub-tables
 def add_competitor_profile(data: dict) -> None:
@@ -98,3 +106,22 @@ def add_competitor_profile(data: dict) -> None:
         print(f"[DB] Data inserted into CompetitorProfile table and its sub-tables successfully.")
     except sqlite3.Error as e:
         print(f"[DB] An error occurred: {e}")
+        
+def get_competitor_full_data(name: str) -> dict:
+    name = name.replace("-", ", ")  
+    try:
+        competitor_profile = cur.execute(f"SELECT * FROM CompetitorProfile WHERE name = ?", (name,)).fetchone()
+        if competitor_profile:
+            periods = cur.execute("SELECT * FROM Periods WHERE competitor_id = ?", (competitor_profile['id'],)).fetchall()
+            
+            surface_data = {}
+            for period in periods:
+                surface_data[period['id']] = cur.execute("SELECT * FROM Surfaces WHERE period_id = ?", (period['id'],)).fetchall()
+        else:
+            periods = []
+            surface_data = {}
+        return competitor_profile, periods, surface_data
+            
+    except sqlite3.Error as e:
+        print(f"[DB] An error occurred: {e}")
+        return None

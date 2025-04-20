@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ name }} - Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen font-sans">
+    <div class="max-w-2xl mx-auto pt-20 px-4">
+        <!-- App Title -->
+        <h1 class="text-3xl font-bold text-center text-blue-600 mb-8 drop-shadow-sm">
+            Tennis Predictor v1.0
+        </h1>
+
+        {% if player %}
+        <!-- Profile Card -->
+        <div class="bg-white rounded-2xl shadow-md p-6 space-y-4">
+            <h2 class="text-2xl font-semibold text-gray-800">{{ player['name'] }}</h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
+                <div><strong>Country:</strong> {{ player['country'] or 'N/A' }}</div>
+                <div><strong>Abbreviation:</strong> {{ player['abbreviation'] or 'N/A' }}</div>
+                <div><strong>Pro Year:</strong> {{ player['pro_year'] or 'N/A' }}</div>
+                <div><strong>Handedness:</strong> {{ player['handedness'] or 'N/A' }}</div>
+                <div><strong>Highest Singles Ranking:</strong> {{ player['highest_singles_ranking'] or 'N/A' }}</div>
+                <div><strong>Highest Ranking Date:</strong> {{ player['highest_singles_ranking_date'] or 'N/A' }}</div>
+                <div><strong>Rank:</strong> {{ player['rank'] or 'N/A' }}</div>
+                <div><strong>Points:</strong> {{ player['points'] or 'N/A' }}</div>
+                <div><strong>Weight:</strong> {{ player['weight'] or 'N/A' }} kg</div>
+                <div><strong>Height:</strong> {{ player['height'] or 'N/A' }} cm</div>
+                <div><strong>Date of Birth:</strong> {{ player['date_of_birth'] or 'N/A' }}</div>
+            </div>
+        </div>
+        {% if periods %}
+            <div class="mt-10 bg-white rounded-xl shadow p-6 space-y-4 mb-16">
+                <h3 class="text-xl font-semibold text-gray-800">Season Stats</h3>
+            
+                <!-- Year selector -->
+                <label for="yearSelect" class="block text-sm text-gray-600 font-medium">Select Year</label>
+                <div class="relative">
+                    <select id="yearSelect"
+                        class="w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 px-3 pr-10 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        {% for period in periods %}
+                        <option value="{{ period['id'] }}">{{ period['year'] }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
+                        ▼
+                    </div>
+                </div>
+            
+                <!-- Stats Display -->
+                <div id="yearStats" class="mt-4 text-gray-700 text-sm">
+                    <!-- Filled by JS -->
+                </div>
+            </div>
+        
+            <!-- Hidden data + JS -->
+            <script>
+                const statsData = {
+                    {% for period in periods %}
+                        "{{ period['id'] }}": {
+                            year: "{{ period['year'] }}",
+                            competitions_played: {{ period['competitions_played'] or 0 }},
+                            competitions_won: {{ period['competitions_won'] or 0 }},
+                            matches_played: {{ period['matches_played'] or 0 }},
+                            matches_won: {{ period['matches_won'] or 0 }},
+                            surfaces: [
+                                {% for s in surface_data.get(period['id'], []) if s['type'] != 'unknown' %}
+                                    {
+                                        type: "{{ s['type'] }}",
+                                        competitions_played: {{ s['competitions_played'] or 0 }},
+                                        competitions_won: {{ s['competitions_won'] or 0 }},
+                                        matches_played: {{ s['matches_played'] or 0 }},
+                                        matches_won: {{ s['matches_won'] or 0 }}
+                                    },
+                                {% endfor %}
+                            ]
+                        },
+                    {% endfor %}
+                };
+            
+                function renderStats(periodId) {
+                    const stats = statsData[periodId];
+                    if (!stats) return;
+            
+                    let html = `
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div><strong>Competitions Played:</strong> ${stats.competitions_played}</div>
+                            <div><strong>Competitions Won:</strong> ${stats.competitions_won}</div>
+                            <div><strong>Matches Played:</strong> ${stats.matches_played}</div>
+                            <div><strong>Matches Won:</strong> ${stats.matches_won}</div>
+                        </div>
+                    `;
+            
+                    if (stats.surfaces.length > 0) {
+                        html += `<h4 class="font-semibold text-gray-600 mb-2">By Surface:</h4>`;
+                        html += `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">`;
+            
+                        stats.surfaces.forEach(s => {
+                            html += `
+                                <div class="bg-gray-50 p-3 rounded-md border">
+                                    <div><strong>Surface:</strong> ${s.type}</div>
+                                    <div><strong>Competitions Won:</strong> ${s.competitions_won}/${s.competitions_played}</div>
+                                    <div><strong>Matches Won:</strong> ${s.matches_won}/${s.matches_played}</div>
+                                </div>
+                            `;
+                        });
+            
+                        html += `</div>`;
+                    }
+            
+                    document.getElementById('yearStats').innerHTML = html;
+                }
+            
+                document.getElementById('yearSelect').addEventListener('change', function () {
+                    renderStats(this.value);
+                });
+            
+                window.addEventListener('DOMContentLoaded', () => {
+                    const initial = document.getElementById('yearSelect').value;
+                    renderStats(initial);
+                });
+            </script>
+        {% endif %}
+        {% else %}
+        <div class="bg-white p-6 rounded-2xl shadow-md text-center text-gray-600">
+            <p>No player found with name <strong>{{ name }}</strong>.</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

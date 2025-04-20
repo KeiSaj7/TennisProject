@@ -1,0 +1,6 @@
+<!-- templates/suggestions.html -->
+{% for match in matches %}
+    <li class="suggestion-item px-4 py-2 hover:bg-blue-100 cursor-pointer">{{ match }}</li>
+{% else %}
+    <li class="px-4 py-2 text-gray-500">No players found</li>
+{% endfor %}
