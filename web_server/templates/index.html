@@ -54,7 +54,9 @@
         document.getElementById('search-btn').addEventListener('click', function () {
             const playerName = document.getElementById('player').value.replace(/ /g, "-").trim();
             if (playerName) {
-                window.location.href = `/player/${encodeURIComponent(playerName)}`;
+                const baseUrl = "{{ url_for('player', name='__name__') }}"
+                const finalUrl = baseUrl.replace('__name__', encodeURIComponent(playerName))
+                window.location.href = finalUrl;
             }
         });
     </script>
