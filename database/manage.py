@@ -109,9 +109,11 @@ def add_competitor_profile(data: dict) -> None:
         print(f"[DB] An error occurred: {e}")
         
 def get_competitor_full_data(name: str) -> dict:
-    name = name.replace("-", ", ")  
+    name = name.replace("-", " ")
+    parts = name.split(" ")
+    part1, part2 = parts[0], parts[1]
     try:
-        competitor_profile = cur.execute(f"SELECT * FROM CompetitorProfile WHERE name = ?", (name,)).fetchone()
+        competitor_profile = cur.execute(f"SELECT * FROM CompetitorProfile WHERE name LIKE ?", (f"%{parts[0]}%{parts[1]}%",)).fetchone()
         if competitor_profile:
             periods = cur.execute("SELECT * FROM Periods WHERE competitor_id = ?", (competitor_profile['id'],)).fetchall()
             
@@ -174,7 +176,7 @@ def calc_overall_elo_for_year(id: str, year: int) -> float:
 def get_competitor_period_years(id: str) -> list[str]:
     try:
         years = cur.execute("SELECT year FROM Periods WHERE competitor_id = ?", (id,)).fetchall()
-        return [row['year'] for row in years]
+        return [row['year'] for row in years][0:2]
     
     except sqlite3.Error as e:
         print(f"[DB] An error occurred: {e}")
