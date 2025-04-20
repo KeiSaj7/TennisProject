@@ -12,7 +12,9 @@ async def home():
 async def search():
     query = request.args.get("player", "").lower()
     search_matches = [c for c in COMPETITORS if query in c.lower()]
-    return render_template('suggestions.html', matches = search_matches)
+    if search_matches:
+        return render_template('suggestions.html', matches = search_matches)
+    return ""
 
 @app.route('/player/<name>')
 async def player(name: str):

@@ -44,6 +44,7 @@ def get_all_competitors_names() -> list[str]:
         return ["Error"]
     
 # CompetitorProfile Table and it's sub-tables
+
 def add_competitor_profile(data: dict) -> None:
     try:
         competitor = data.get("competitor", {})
@@ -122,6 +123,59 @@ def get_competitor_full_data(name: str) -> dict:
             surface_data = {}
         return competitor_profile, periods, surface_data
             
+    except sqlite3.Error as e:
+        print(f"[DB] An error occurred: {e}")
+        return None
+    
+"""
+    ELO RATINGS CALCULATIONS
+""" 
+
+# OVERALL ELO RATING
+def calc_overall_elo_for_all_competitors():
+    try:
+        print("[DB] Refreshing overall ratings...")
+        ids = get_competitors_ids()
+        for id in ids:
+            elo = 0
+            years = get_competitor_period_years(id)
+            for year in years:
+                elo += calc_overall_elo_for_year(id, year)
+            elo = round(elo / (len(years)-1), 2)
+            add_competitor_overall_elo(id, elo)
+            print(f"[DB] Competitors left: {len(ids)-1-ids.index(id)}")
+        print("[DB] Finished refreshing competitors overall ratings")
+                
+    except sqlite3.Error as e:
+        print(f"[DB] An error occurred: {e}")
+        return None
+        
+def add_competitor_overall_elo(id: str, elo: float):
+    try:
+        cur.execute("INSERT OR REPLACE INTO Ratings (competitor_id, rating) VALUES (?, ?)", (id, elo,))
+        con.commit()
+        print(f"[DB] Added new overall rating for {id}: {elo} points")
+        
+    except sqlite3.Error as e:
+        print(f"[DB] An error occurred: {e}")
+        return None
+        
+def calc_overall_elo_for_year(id: str, year: int) -> float:
+    # ( (matches_won * (1 + (0.1 * competitions_won) ) ) / (matches_played / competitions_played) ) * 10
+    try:
+        elo = cur.execute("SELECT ((matches_won * (1 + 0.1 * competitions_won)) / (matches_played / competitions_played)) * 10 FROM Periods WHERE competitor_id = ? AND year = ?", (id, year,)).fetchone()
+        elo = elo[0]
+        return elo
+    
+    except sqlite3.Error as e:
+        print(f"[DB] An error occurred: {e}")
+        return None
+
+def get_competitor_period_years(id: str) -> list[str]:
+    try:
+        years = cur.execute("SELECT year FROM Periods WHERE competitor_id = ?", (id,)).fetchall()
+        return [row['year'] for row in years]
+    
     except sqlite3.Error as e:
         print(f"[DB] An error occurred: {e}")
         return None

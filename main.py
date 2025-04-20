@@ -10,7 +10,8 @@ API_KEY = os.getenv("API_KEY")
 
 if __name__ == "__main__":
     print("Tennis Predictor v1.0")
-    start_app()
+    #start_app()
+    db.calc_overall_elo_for_all_competitors()
     #SeasonCompetitors(API_KEY)
     #competitors_ids = db.get_competitors_ids()
     #name1 = db.get_competitor_name_by_id("sr:competitor:429603")
