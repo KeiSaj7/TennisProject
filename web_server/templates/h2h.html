@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tennis Predictor v1.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="absolute top-4 left-4 flex space-x-4 text-white text-lg font-semibold">
+        <a href="{{ url_for('home') }}" class="hover:underline {{ 'underline' if active_tab == 'search' else '' }} text-blue-600">Search</a>
+        <a href="{{ url_for('h2h') }}" class="hover:underline {{ 'underline' if active_tab == 'h2h' else '' }} text-blue-600">H2H</a>
+    </div>
+    <div class="w-full max-w-md mx-auto pt-24 relative">
+        <!-- App Title -->
+        <h1 class="text-3xl font-bold text-center text-blue-600 mb-8 drop-shadow-sm">
+            Tennis Predictor v1.0
+        </h1>
+        <!-- Search bar -->
+        <div class="flex items-center space-x-3">
+            <div class="relative">
+                <input 
+                    type="text" 
+                    id="player1" 
+                    name="player"
+                    placeholder="Player 1"
+                    class="rounded-full px-2 py-2 w-50 text-black border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    hx-get="/search"
+                    hx-trigger="keyup changed delay:300ms"
+                    hx-target="#suggestions1"
+                    hx-swap="innerHTML"
+                    autocomplete="off"
+                />
+                <ul
+                    id="suggestions1"
+                    class="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-md shadow-md z-10 max-h-60 overflow-y-auto"
+                ></ul>
+            </div>
+            <span class="font-semibold text-blue-600">VS</span>
+            <div class="relative">
+                <input 
+                    type="text" 
+                    id="player2" 
+                    name="player"
+                    placeholder="Player 2"
+                    class="rounded-full px-2 py-2 w-50 text-black border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    hx-get="/search"
+                    hx-trigger="keyup changed delay:300ms"
+                    hx-target="#suggestions2"
+                    hx-swap="innerHTML"
+                    autocomplete="off"
+                />
+                <ul
+                    id="suggestions2"
+                    class="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-md shadow-md z-10 max-h-60 overflow-y-auto"
+                ></ul>
+            </div>
+        </div>
+        <button id="h2h-btn" class="ml-44 mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full ">Compare</button>
+
+    </div>
+    <script>
+        document.addEventListener('click', function (e) {
+            if (e.target.matches('.suggestion-item')) {
+                const suggestions1 = document.getElementById('suggestions1');
+                const suggestions2 = document.getElementById('suggestions2');
+    
+                if (suggestions1.contains(e.target)) {
+                    document.getElementById('player1').value = e.target.textContent.trim();
+                    suggestions1.innerHTML = '';
+                } else if (suggestions2.contains(e.target)) {
+                    document.getElementById('player2').value = e.target.textContent.trim();
+                    suggestions2.innerHTML = '';
+                }
+            }
+        });
+        
+        document.getElementById('h2h-btn').addEventListener('click', function () {
+            const player1 = document.getElementById('player1').value.replace(/ /g, "-").trim();
+            const player2 = document.getElementById('player2').value.replace(/ /g, "-").trim();
+        
+            if (player1 && player2) {
+                const baseUrl = "{{ url_for('h2h_compare', player1='__p1__', player2='__p2__') }}";
+                const finalUrl = baseUrl.replace('__p1__', encodeURIComponent(player1)).replace('__p2__', encodeURIComponent(player2));
+                window.location.href = finalUrl;
+            }
+        });
+    </script>
+    
+</body>
+</html>

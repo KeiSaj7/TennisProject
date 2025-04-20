@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route('/')
 async def home():
-    return render_template('index.html')  
+    return render_template('index.html', active_tab="search")  
 
 @app.route('/search')
 async def search():
@@ -18,6 +18,14 @@ async def player(name):
     player, periods, surface_data = get_competitor_full_data(name)
     #return redirect(f"https://tennisstats.com/players/{name}")
     return render_template('player.html', player=player, periods=periods, surface_data=surface_data, name=name)
+
+@app.route('/h2h')
+def h2h():
+    return render_template('h2h.html', active_tab ="h2h")
+
+@app.route('/h2h/<player1>/<player2>')
+def h2h_compare(player1, player2):
+    return f"Compare {player1} vs {player2}"
 
 def start_app():
     global COMPETITORS

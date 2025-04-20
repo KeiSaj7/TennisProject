@@ -7,6 +7,10 @@
     <script src="https://unpkg.com/htmx.org@1.9.2"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
+    <div class="absolute top-4 left-4 flex space-x-4 text-white text-lg font-semibold">
+        <a href="{{ url_for('home') }}" class="hover:underline {{ 'underline' if active_tab == 'search' else '' }} text-blue-600">Search</a>
+        <a href="{{ url_for('h2h') }}" class="hover:underline {{ 'underline' if active_tab == 'h2h' else '' }} text-blue-600">H2H</a>
+    </div>
     <div class="w-full max-w-md mx-auto pt-24 relative">
         <!-- App Title -->
         <h1 class="text-3xl font-bold text-center text-blue-600 mb-8 drop-shadow-sm">
@@ -28,7 +32,7 @@
             />
             <button
                 id="search-btn"
-                class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-500 text-white px-4 py-1 rounded-full hover:bg-blue-600 focus:outline-none text-sm"
+                class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-4 py-1 rounded-full hover:bg-blue-700 focus:outline-none text-sm"
             >
                 Go
             </button>
