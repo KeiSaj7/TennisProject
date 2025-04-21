@@ -2,3 +2,4 @@ requests
 sqlite3
 flask
 bs4
+itertools
