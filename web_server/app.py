@@ -18,10 +18,10 @@ async def search():
 
 @app.route('/player/<name>')
 async def player(name: str):
-    if name in COMPETITORS:
+    if name.replace('-', ' ') in COMPETITORS:
         player, periods, surface_data = get_competitor_full_data(name)
         #return redirect(f"https://tennisstats.com/players/{name}")
-        return render_template('player.html', player=player, periods=periods, surface_data=surface_data, name=name)
+        return render_template('player.html', error = False, player=player, periods=periods, surface_data=surface_data, name=name)
     return render_template('player.html', error = True, name=name)
 
 @app.route('/h2h')
