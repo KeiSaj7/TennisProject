@@ -8,17 +8,18 @@ from web_server.app import start_app
 load_dotenv()
 API_KEY = os.getenv("API_KEY")
 
+def Refresh():
+    ids = db.get_competitors_ids()
+    SeasonCompetitors.SeasonCompetitors()
+    CompetitorProfile.CompetitorProfile(API_KEY, ids)
+    db.calc_every_rating_for_all_competitors()
+    
+    
+
 if __name__ == "__main__":
     print("Tennis Predictor v1.0")
-    #start_app()
-    #db.calc_overall_elo_for_all_competitors()
-    #SeasonCompetitors(API_KEY)
-    #competitors_ids = db.get_competitors_ids()
-    #name1 = db.get_competitor_name_by_id("sr:competitor:429603")
-    #name2 = db.get_competitor_name_by_id("sr:competitor:23581")
-    #print(get_H2H_stats(db.get_competitor_name_by_id(competitors_ids[4]), db.get_competitor_name_by_id(competitors_ids[8])))
-    #print(get_H2H_stats(db.get_competitor_name_by_id(competitors_ids[12]), db.get_competitor_name_by_id(competitors_ids[47])))
-    #print(get_H2H_stats(db.get_competitor_name_by_id(competitors_ids[56]), db.get_competitor_name_by_id(competitors_ids[23])))
+    start_app()
+
     
     
     
