@@ -6,6 +6,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen font-sans">
+    <div class="absolute top-4 left-4 flex space-x-4 text-white text-lg font-semibold">
+        <a href="{{ url_for('home') }}" class="hover:underline {{ 'underline' if active_tab == 'search' else '' }} text-blue-600">Search</a>
+        <a href="{{ url_for('h2h') }}" class="hover:underline {{ 'underline' if active_tab == 'h2h' else '' }} text-blue-600">H2H</a>
+    </div>
     <div class="max-w-2xl mx-auto pt-20 px-4">
         <!-- App Title -->
         <h1 class="text-3xl font-bold text-center text-blue-600 mb-8 drop-shadow-sm">
