@@ -41,6 +41,11 @@ def check_permutations(player1, player2):
                 if score is not None: return score, soup
             return score, soup
         # Both players are str
+        score, soup = try_url(player1, player2)
+        if score is not None: return score, soup
+        score, soup = try_url(player2, player1)
+        if score is not None: return score, soup
+        return score, soup
     else:
         # Both players or only player1 can be a list
         if type(player2) == list:
