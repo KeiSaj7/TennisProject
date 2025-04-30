@@ -1,14 +1,16 @@
-import requests
 from bs4 import BeautifulSoup
+import cloudscraper
 from itertools import permutations
+
+scraper = cloudscraper.create_scraper()
 
 def try_url(player1: str, player2: str):
     url = f"https://tennisstats.com/h2h/{player1}-vs-{player2}"
     print(url)
     
     try:
-        response = requests.get(url= url)
-    except requests.exceptions.RequestException as e:
+        response = scraper.get(url= url)
+    except Exception as e:
         print(f"[API] An error occurred: {e}")
         return None
 

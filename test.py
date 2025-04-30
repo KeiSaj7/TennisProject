@@ -1,6 +1,14 @@
-def fun():
-    return None, None
+from bs4 import BeautifulSoup
+import cloudscraper
+import requests
 
-a,b = fun()
+scraper = cloudscraper.create_scraper()
 
-print(a,b)
+url = 'https://tennisstats.com/h2h/carlos-alcaraz-vs-novak-djokovic-43040'
+response = scraper.get(url)
+
+soup = BeautifulSoup(response.content, 'html.parser')
+score = soup.find("p", class_="bold h2h-record-max-font")
+
+
+print(score)

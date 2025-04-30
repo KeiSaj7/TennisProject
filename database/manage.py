@@ -254,3 +254,20 @@ def get_competitor_period_years(id: str) -> list[str]:
     except sqlite3.Error as e:
         print(f"[DB] An error occurred: {e}")
         return None
+
+"""
+    H2H DATA
+"""
+
+def get_h2h_data(player1, player2):
+    ratings = get_h2h_ratings(player1, player2)
+    pass
+
+def get_h2h_ratings(player1, player2):
+    try:
+        ratings = cur.execute("SELECT * FROM Ratings WHERE competitor_id IN (?, ?)", (player1, player2,)).fetchall()
+        ratings = {list(ratings[0])[0] : list(ratings[0])[1:], list(ratings[1])[0] : list(ratings[1])[1:]}
+        return ratings
+    except sqlite3.Error as e:
+        print(f"[DB] An error occurred: {e}")
+        return None

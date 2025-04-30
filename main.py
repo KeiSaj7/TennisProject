@@ -18,7 +18,8 @@ def Refresh():
 
 if __name__ == "__main__":
     print("Tennis Predictor v1.0")
-    start_app()
+    db.get_h2h_ratings('sr:competitor:407573', 'sr:competitor:14882')
+    #start_app()
 
     
     
