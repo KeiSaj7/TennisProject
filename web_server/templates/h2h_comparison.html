@@ -1,4 +1,3 @@
-<!-- templates/h2h_result.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,15 +25,15 @@
         {% endif %}
     {% endmacro %}
 
-    <div class="w-full max-w-4xl mx-auto pt-24">
+    <div class="w-full max-w-5xl mx-auto pt-24">
         <h1 class="text-3xl font-bold text-center text-blue-600 mb-10">Head to Head Comparison</h1>
 
         {% if error %}
-            <p class="text-center text-blue-500 text-xl font-semibold mt-10">
-                {{ error }}
-        </p>
+            <p class="text-center text-blue-500 text-xl font-semibold mt-10">{{ error }}</p>
         {% else %}
-            <div class="bg-white rounded-2xl shadow-md p-6 grid grid-cols-3 gap-6 items-center">
+
+            <!-- Headline H2H Card -->
+            <div class="bg-white rounded-2xl shadow-md p-6 grid grid-cols-3 gap-6 items-center mb-6">
                 <!-- Player 1 -->
                 <div class="text-center">
                     <div class="flex items-center justify-center space-x-2 mb-2">
@@ -69,8 +68,99 @@
                     {% endfor %}
                 </div>
             </div>
-            <div class="bg-white rounded-2xl mt-5 shadow-md p-6 grid grid-cols-3 gap-6 items-center">
+
+            <!-- Elo Ratings -->
+            <div class="bg-white rounded-2xl shadow-md p-6 mb-6">
+                <h2 class="text-xl font-semibold text-center text-blue-600 mb-4">Elo Ratings</h2>
+                <div class="grid grid-cols-2 gap-6">
+                    <!-- Player 1 Ratings -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-blue-700 mb-2 text-center">{{ player1 }}</h3>
+                        {% set labels = ['Overall', 'Red Clay', 'Hardcourt Outdoor', 'Grass'] %}
+                        <div class="grid grid-cols-2 gap-3">
+                            {% for i in range(labels|length) %}
+                            <div class="bg-blue-100 rounded-xl p-3 text-center">
+                                <p class="text-sm text-gray-600 font-medium">{{ labels[i] }}</p>
+                                <p class="text-lg font-bold text-blue-700">{{ data[player1_id]['ratings'][i] }}</p>
+                            </div>
+                        {% endfor %}
+                        
+                        </div>
+                    </div>
+
+                    <!-- Player 2 Ratings -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-blue-700 mb-2 text-center">{{ player2 }}</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            {% for i in range(labels|length) %}
+                            <div class="bg-blue-100 rounded-xl p-3 text-center">
+                                <p class="text-sm text-gray-600 font-medium">{{ labels[i] }}</p>
+                                <p class="text-lg font-bold text-blue-700">{{ data[player2_id]['ratings'][i] }}</p>
+                            </div>
+                        {% endfor %}                        
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Year Selector and Winrates -->
+            <div class="bg-white rounded-2xl shadow-md p-6 mb-6">
+                <h2 class="text-xl font-semibold text-center text-blue-600 mb-4">Win Rates by Year</h2>
+
+                <div class="flex justify-center mb-4">
+                    <label for="yearSelect" class="mr-2 font-medium text-gray-700">Select Year:</label>
+                    <select id="yearSelect" class="border rounded px-2 py-1">
+                        {% for year in data[player1_id] if year is number %}
+                            <option value="{{ year }}">{{ year }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div id="yearDataContainer">
+                    {% for year in data[player1_id] if year is number %}
+                        <div data-year="{{ year }}" class="year-data hidden">
+                            <div class="grid grid-cols-2 gap-6">
+                                <div class="text-center">
+                                    <h3 class="text-lg font-semibold text-blue-500 mb-2 text-center">{{ player1 }} - {{ year }}</h3>
+                                    {% for surface, winrate in data[player1_id][year].items() %}
+                                        <p><span class="font-medium">{{ surface|replace('_', ' ')|title }}:</span> {{ (winrate * 100)|round(1) }}%</p>
+                                    {% endfor %}
+                                </div>
+                                <div class="text-center">
+                                    <h3 class="text-lg font-semibold text-blue-500 mb-2 text-center">{{ player2 }} - {{ year }}</h3>
+                                    {% for surface, winrate in data[player2_id][year].items() %}
+                                        <p><span class="font-medium">{{ surface|replace('_', ' ')|title }}:</span> {{ (winrate * 100)|round(1) }}%</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
         {% endif %}
     </div>
+
+    <script>
+        const select = document.getElementById("yearSelect");
+        const containers = document.querySelectorAll(".year-data");
+
+        function showYearData(year) {
+            containers.forEach(c => {
+                if (c.dataset.year === year) {
+                    c.classList.remove("hidden");
+                } else {
+                    c.classList.add("hidden");
+                }
+            });
+        }
+
+        select.addEventListener("change", (e) => {
+            showYearData(e.target.value);
+        });
+
+        // Initialize
+        if (select.value) showYearData(select.value);
+    </script>
 </body>
 </html>

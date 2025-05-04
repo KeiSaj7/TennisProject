@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect
-from database.manage import get_all_competitors_names, get_competitor_full_data
+from database.manage import get_all_competitors_names, get_competitor_full_data, get_h2h_data, get_competitor_id_by_name
 from scraper import get_H2H_stats
 
 app = Flask(__name__)
@@ -30,7 +30,8 @@ def h2h():
 
 @app.route('/h2h/<player1>/<player2>')
 def h2h_compare(player1: str, player2: str ):
-    h2h_stats = get_H2H_stats(player1.replace('-', ", "), player2.replace('-', ", "))
+    h2h_stats = get_H2H_stats(player1.replace('-', ', '), player2.replace('-', ', '))
+    h2h_data = get_h2h_data(player1.replace('-', ' '), player2.replace('-', ' '))
     if h2h_stats is None:
         return render_template(
             'h2h_comparison.html',
@@ -38,9 +39,12 @@ def h2h_compare(player1: str, player2: str ):
             player2=player2.replace('-', ' '),
             error="No H2H score found for these players."
         )
-    
     names = list(h2h_stats.keys())
-    return render_template('h2h_comparison.html', player1=player1.replace('-', ' '), player2=player2.replace('-', ' '), stats1 = h2h_stats[names[0]] , stats2 = h2h_stats[names[1]])
+    player1_id = get_competitor_id_by_name(player1.replace('-', ' '))
+    player2_id = get_competitor_id_by_name(player2.replace('-', ' '))
+    return render_template('h2h_comparison.html', player1=player1.replace('-', ' '), player2=player2.replace('-', ' '), 
+                           player1_id = player1_id, player2_id = player2_id,
+                           stats1 = h2h_stats[names[0]] , stats2 = h2h_stats[names[1]], data = h2h_data)
 
 def start_app():
     global COMPETITORS

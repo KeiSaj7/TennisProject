@@ -34,6 +34,16 @@ def get_competitor_name_by_id(competitor_id: str) -> str:
         print(f"[DB] An error occurred: {e}")
         return None
     
+def get_competitor_id_by_name(name: str) -> str:
+    table="SeasonCompetitors"
+    try:
+        name_parts = name.split(sep=' ')
+        competitor_id: str = cur.execute(f"SELECT id FROM {table} WHERE name LIKE ?", (f"%{name_parts[0]}%{name_parts[1]}%",)).fetchone()
+        return competitor_id["id"] if competitor_id else None
+    except sqlite3.Error as e:
+        print(f"[DB] An error occurred: {e}")
+        return None
+    
 def get_all_competitors_names() -> list[str]:
     table="SeasonCompetitors"
     try:
@@ -260,14 +270,33 @@ def get_competitor_period_years(id: str) -> list[str]:
 """
 
 def get_h2h_data(player1, player2):
+    player1 = get_competitor_id_by_name(player1)
+    player2 = get_competitor_id_by_name(player2)
     ratings = get_h2h_ratings(player1, player2)
-    pass
+    winrates = get_h2h_winrates(player1, player2)
+    winrates[player1].update({'ratings' : ratings[player1]})
+    winrates[player2].update({'ratings' : ratings[player2]})
+    return winrates
 
 def get_h2h_ratings(player1, player2):
     try:
         ratings = cur.execute("SELECT * FROM Ratings WHERE competitor_id IN (?, ?)", (player1, player2,)).fetchall()
         ratings = {list(ratings[0])[0] : list(ratings[0])[1:], list(ratings[1])[0] : list(ratings[1])[1:]}
         return ratings
+    except sqlite3.Error as e:
+        print(f"[DB] An error occurred: {e}")
+        return None
+    
+def get_h2h_winrates(player1, player2):
+    try:
+        winrates = cur.execute("SELECT competitor_id, ((matches_won * 1.0 )/matches_played), year, id FROM Periods WHERE competitor_id IN (?, ?) AND year IN (2024, 2025)", (player1, player2)).fetchall()
+        h2h_winrates = {player1: {}, player2: {}}
+        for r in winrates:
+            h2h_winrates[r[0]][r[2]] = {'overall' : round(r[1], 2)}
+            surfaces = cur.execute("SELECT type, (matches_won * 1.0/matches_played) FROM Surfaces WHERE period_id = ? AND type != 'unknown'", (r[3],)).fetchall()
+            for s in surfaces:
+                h2h_winrates[r[0]][r[2]].update({s[0] : round(s[1], 2)})
+        return h2h_winrates
     except sqlite3.Error as e:
         print(f"[DB] An error occurred: {e}")
         return None
